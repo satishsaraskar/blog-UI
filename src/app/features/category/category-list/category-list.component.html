@@ -23,6 +23,8 @@
             <td>{{category.urlHandle}}  </td>
             <td>
               <a class="btn btn-light" [routerLink]="['/admin/categories',category.id]">Edit</a>
+
+                <!-- <button class="btn btn-light" (click)="onDeleteCategory(category.id)" >Delete</button> -->
             </td>
           </tr>
         </tbody>

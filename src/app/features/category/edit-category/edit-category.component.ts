@@ -1,8 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CategoryService } from '../services/category.service';
 import { Category } from '../models/category.model';
+import { UpdateCategoryRequest } from '../models/update-category-request.model';
 
 @Component({
   selector: 'app-edit-category',
@@ -14,11 +15,11 @@ export class EditCategoryComponent implements OnInit,OnDestroy {
   id: string |null = null;
   category!: Category;
  paramsSubscription?:Subscription;
-  constructor(private route:ActivatedRoute, private categoryService:CategoryService ){}
+ editCategorySubscription?:Subscription;
 
-  ngOnDestroy(): void {
-    this.paramsSubscription?.unsubscribe();
-  }
+  constructor(private route:ActivatedRoute, private categoryService:CategoryService ,private router : Router){}
+
+
 
   ngOnInit(): void {
  this.paramsSubscription = this.route.paramMap.subscribe({
@@ -39,8 +40,46 @@ export class EditCategoryComponent implements OnInit,OnDestroy {
     })
   }
 
+
+
   onFormSubmit():void{
     console.log(this.category);
+    const updateCategoryRequest: UpdateCategoryRequest = {
+        name:this.category?.name ?? '',
+        urlHandle:this.category?.urlHandle ?? '',
+    }
+
+//pass this object to service
+if(this.id){
+
+  this.editCategorySubscription = this.categoryService.updateCategory(this.id,updateCategoryRequest)
+  .subscribe({
+    next:(response)=> {
+      console.log('updateCategoryDataObject', response)
+      this.router.navigateByUrl('/admin/categories')
+    },
+    error:(error)=>{
+ console.log(error)
+    }
+  })
+}
+
   }
 
+  onDeleteCategory():void{
+    if(this.id){
+
+      this.categoryService.deleteCategory(this.id)
+      .subscribe({
+        next:(Response)=> {
+          this.router.navigateByUrl('/admin/categories')
+        }
+      })
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.paramsSubscription?.unsubscribe();
+    this.editCategorySubscription?.unsubscribe();
+  }
 }
